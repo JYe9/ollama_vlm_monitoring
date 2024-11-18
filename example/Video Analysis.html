@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<!-- saved from url=(0022)http://localhost:8000/ -->
+<html lang="en"><script id="allow-copy_script" src="chrome-extension://aefehdhdciieocakfobpaaolhipkcpgc/content_scripts/copy.js"></script><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Analysis</title>
+    <link href="./Video Analysis_files/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 5px;
+            padding: 20px;
+            text-align: center;
+            background: #f8f9fa;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        .upload-area:hover {
+            border-color: #0d6efd;
+            background: #f1f3f5;
+        }
+        .results-container {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        .frame-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        .analyzing {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title mb-0">Video Object Detection</h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="uploadForm">
+                            <div class="mb-3">
+                                <label class="form-label">Upload Video</label>
+                                <div class="upload-area" id="uploadArea">
+                                    <div id="uploadText">
+                                        <p class="mb-0">Click or drag video to upload</p>
+                                    </div>
+                                    <input type="file" id="videoInput" accept="video/*" class="d-none">
+                                </div>
+                                <small class="text-muted" id="fileInfo">Selected file: redCar.mp4</small>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="objectInput" class="form-label">Object to Find</label>
+                                <input type="text" class="form-control" id="objectInput" placeholder="e.g., &#39;Find the red car driving on the highway&#39;">
+                            </div>
+
+                            <div class="alert alert-danger d-none" id="errorAlert">An error occurred during analysis</div>
+
+                            <button type="submit" class="btn btn-primary w-100" id="analyzeBtn">
+                                Start Analysis
+                            </button>
+                        </form>
+
+                        <div id="statusText" class="text-center mt-3 d-none">
+                            <p class="analyzing">Analyzing video...</p>
+                        </div>
+
+                        <div class="results-container mt-4" id="resultsContainer"><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 19 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./Video Analysis_files/frame_19.jpg" alt="Frame 19" class="frame-image">
+                        <p class="card-text">The image shows an aerial view of a highway with multiple lanes and no cars visible. There are buildings, trees, and other structures along the sides of the road but no red car is present.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 18 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./Video Analysis_files/frame_18.jpg" alt="Frame 18" class="frame-image">
+                        <p class="card-text">The red car is small and appears to be a hatchback or sedan. It is driving on the road in the center of the image, heading towards the right side of the frame. The car has a distinctive red color with white trim around the windows and roof. It also has a black grill and headlights, as well as a silver license plate on the front bumper.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 8/10</small>
+                            <small class="text-muted float-end">Match: Yes</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 17 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./Video Analysis_files/frame_17.jpg" alt="Frame 17" class="frame-image">
+                        <p class="card-text">The red car is located on the rightmost lane of the highway, positioned between two other vehicles. It appears to be a hatchback or sedan with a distinctive red color and a black roof rack. The car is driving away from the camera, heading towards the bottom-right corner of the image.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 8/10</small>
+                            <small class="text-muted float-end">Match: Yes</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 16 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./Video Analysis_files/frame_16.jpg" alt="Frame 16" class="frame-image">
+                        <p class="card-text">The red car is driving on the road in the top center of the image. It has a sleek design with a curved body and a sloping roofline, which gives it a sporty appearance. The car's bright red color stands out against the gray asphalt of the highway. As it drives towards the right side of the image, its tires leave behind faint tire tracks on the road surface.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 8/10</small>
+                            <small class="text-muted float-end">Match: Yes</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 15 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./Video Analysis_files/frame_15.jpg" alt="Frame 15" class="frame-image">
+                        <p class="card-text">The red car is located on the upper left side of the image, driving away from the camera. It has a sleek design with a metallic finish and appears to be a sports car or a high-performance vehicle. The car is in motion, with its tires blurred as it moves along the road.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: Yes</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 14 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./Video Analysis_files/frame_14.jpg" alt="Frame 14" class="frame-image">
+                        <p class="card-text">The red car is located on the leftmost lane of the road, positioned between two other cars. It has a sleek and modern design with a shiny red paint job that catches the eye. The car appears to be driving at a moderate speed, likely around 50-60 km/h (30-37 mph). Its location suggests it may be heading towards the upper-right corner of the image.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 8/10</small>
+                            <small class="text-muted float-end">Match: Yes</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 13 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./Video Analysis_files/frame_13.jpg" alt="Frame 13" class="frame-image">
+                        <p class="card-text">The image shows an aerial view of a highway with several lanes and cars driving on it. There are no red cars visible in the image.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 12 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./Video Analysis_files/frame_12.jpg" alt="Frame 12" class="frame-image">
+                        <p class="card-text">The image shows an aerial view of a highway with several lanes and multiple cars driving on it. However, there is no red car visible in the image.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 11 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./Video Analysis_files/frame_11.jpg" alt="Frame 11" class="frame-image">
+                        <p class="card-text">The image shows an aerial view of a highway with multiple lanes and no visible red cars driving on the road. There are several vehicles moving along the highway, but none of them appear to be red.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 8/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 10 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./Video Analysis_files/frame_10.jpg" alt="Frame 10" class="frame-image">
+                        <p class="card-text">Error occurred</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 0/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 9 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./Video Analysis_files/frame_9.jpg" alt="Frame 9" class="frame-image">
+                        <p class="card-text">The image shows an aerial view of a highway with multiple lanes and no visible red car. There are several vehicles on the road, but none of them appear to be red.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 8 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./Video Analysis_files/frame_8.jpg" alt="Frame 8" class="frame-image">
+                        <p class="card-text">The image shows an aerial view of a highway with multiple lanes and roads. There are several cars visible on the road, but none of them appear to be red.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 8/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 7 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./Video Analysis_files/frame_7.jpg" alt="Frame 7" class="frame-image">
+                        <p class="card-text">The image shows an aerial view of a highway with multiple lanes and no visible red cars. There are several vehicles on the road, but none of them appear to be red.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 6 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./Video Analysis_files/frame_6.jpg" alt="Frame 6" class="frame-image">
+                        <p class="card-text">The image shows an aerial view of a highway with multiple lanes and no visible red cars. There are several vehicles on the road, but none of them appear to be red.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 5 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./Video Analysis_files/frame_5.jpg" alt="Frame 5" class="frame-image">
+                        <p class="card-text">The image depicts a highway with multiple lanes and no red car visible. There are several cars on the road, but none of them match the description of being red.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 4 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./Video Analysis_files/frame_4.jpg" alt="Frame 4" class="frame-image">
+                        <p class="card-text">The image shows an aerial view of a highway with multiple lanes and a median strip. There are several vehicles on the road, but none of them appear to be red cars.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 3 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./Video Analysis_files/frame_3.jpg" alt="Frame 3" class="frame-image">
+                        <p class="card-text">The image shows an aerial view of a highway with multiple lanes and on-ramps. There are no red cars visible in the image.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 2 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./Video Analysis_files/frame_2.jpg" alt="Frame 2" class="frame-image">
+                        <p class="card-text">The image shows an aerial view of a highway with multiple lanes and no cars visible. The road is divided into two sections, each with three lanes in each direction. There are no red cars driving on the road.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 1 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./Video Analysis_files/frame_1.jpg" alt="Frame 1" class="frame-image">
+                        <p class="card-text">The image shows an aerial view of a highway with multiple lanes and no red cars visible. There are several buildings and structures along the sides of the road, but none of them appear to be red cars.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 0 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./Video Analysis_files/frame_0.jpg" alt="Frame 0" class="frame-image">
+                        <p class="card-text">The image shows an aerial view of a highway with multiple lanes and no visible red cars. There are several vehicles on the road, but none of them match the color red.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="./Video Analysis_files/bootstrap.bundle.min.js.download"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const uploadArea = document.getElementById('uploadArea');
+            const videoInput = document.getElementById('videoInput');
+            const uploadForm = document.getElementById('uploadForm');
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            const statusText = document.getElementById('statusText');
+            const errorAlert = document.getElementById('errorAlert');
+            const resultsContainer = document.getElementById('resultsContainer');
+            const fileInfo = document.getElementById('fileInfo');
+
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = '#0d6efd';
+            });
+
+            uploadArea.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = '#ccc';
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = '#ccc';
+                const files = e.dataTransfer.files;
+                if (files.length) {
+                    videoInput.files = files;
+                    updateFileInfo(files[0]);
+                }
+            });
+
+            uploadArea.addEventListener('click', () => {
+                videoInput.click();
+            });
+
+            videoInput.addEventListener('change', (e) => {
+                if (e.target.files.length) {
+                    updateFileInfo(e.target.files[0]);
+                }
+            });
+
+            function updateFileInfo(file) {
+                fileInfo.textContent = `Selected file: ${file.name}`;
+            }
+
+            function showError(message) {
+                errorAlert.textContent = message;
+                errorAlert.classList.remove('d-none');
+            }
+
+            function displayFrame(frame) {
+                const frameCard = document.createElement('div');
+                frameCard.className = 'card mb-3';
+                frameCard.innerHTML = `
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at ${frame.second} seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="${frame.frame_path}" alt="Frame ${frame.second}" class="frame-image">
+                        <p class="card-text">${frame.description || 'No description available'}</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: ${frame.confidence}/10</small>
+                            <small class="text-muted float-end">Match: ${frame.is_match ? 'Yes' : 'No'}</small>
+                        </p>
+                    </div>
+                `;
+                resultsContainer.insertBefore(frameCard, resultsContainer.firstChild);
+            }
+
+            uploadForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const video = videoInput.files[0];
+                const objectStr = document.getElementById('objectInput').value;
+
+                if (!video || !objectStr) {
+                    showError('Please provide both video file and object description');
+                    return;
+                }
+
+                try {
+                    errorAlert.classList.add('d-none');
+                    statusText.classList.remove('d-none');
+                    analyzeBtn.disabled = true;
+                    resultsContainer.innerHTML = '';
+
+                    const formData = new FormData();
+                    formData.append('video', video);
+                    formData.append('object_str', objectStr);
+
+                    const response = await fetch('/analyze', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder();
+
+                    while (true) {
+                        const {value, done} = await reader.read();
+                        if (done) break;
+
+                        const text = decoder.decode(value);
+                        const results = text.split('\n').filter(line => line.trim());
+
+                        for (const result of results) {
+                            try {
+                                const data = JSON.parse(result);
+                                if (data.status === 'success' && data.frame) {
+                                    displayFrame(data.frame);
+                                }
+                            } catch (e) {
+                                console.error('Error parsing result:', e);
+                            }
+                        }
+                    }
+                } catch (error) {
+                    showError('An error occurred during analysis');
+                    console.error('Error:', error);
+                } finally {
+                    statusText.classList.add('d-none');
+                    analyzeBtn.disabled = false;
+                }
+            });
+        });
+    </script>
+
+</body></html>
