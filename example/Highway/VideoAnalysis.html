@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<!-- saved from url=(0022)http://localhost:8000/ -->
+<html lang="en"><script id="allow-copy_script" src="chrome-extension://aefehdhdciieocakfobpaaolhipkcpgc/content_scripts/copy.js"></script><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VideoAnalysis</title>
+    <link href="./VideoAnalysis_files/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 5px;
+            padding: 20px;
+            text-align: center;
+            background: #f8f9fa;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        .upload-area:hover {
+            border-color: #0d6efd;
+            background: #f1f3f5;
+        }
+        .results-container {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        .frame-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        .analyzing {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title mb-0">Video Object Detection</h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="uploadForm">
+                            <div class="mb-3">
+                                <label class="form-label">Upload Video</label>
+                                <div class="upload-area" id="uploadArea" style="border-color: rgb(204, 204, 204);">
+                                    <div id="uploadText">
+                                        <p class="mb-0">Click or drag video to upload</p>
+                                    </div>
+                                    <input type="file" id="videoInput" accept="video/*" class="d-none">
+                                </div>
+                                <small class="text-muted" id="fileInfo">Selected file: dji.mp4</small>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="objectInput" class="form-label">Object to Find</label>
+                                <input type="text" class="form-control" id="objectInput" placeholder="e.g., &#39;Find the red car driving on the highway&#39;">
+                            </div>
+
+                            <div class="alert alert-danger d-none" id="errorAlert"></div>
+
+                            <button type="submit" class="btn btn-primary w-100" id="analyzeBtn">
+                                Start Analysis
+                            </button>
+                        </form>
+
+                        <div id="statusText" class="text-center mt-3 d-none">
+                            <p class="analyzing">Analyzing video...</p>
+                        </div>
+
+                        <div class="results-container mt-4" id="resultsContainer"><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 62 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_62.jpg" alt="Frame 62" class="frame-image">
+                        <p class="card-text">The image depicts an aerial view of a highway with multiple lanes and several vehicles traveling in both directions. There are no buses visible on the highway, let alone one that is blue.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 61 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_61.jpg" alt="Frame 61" class="frame-image">
+                        <p class="card-text">The image depicts an aerial view of a highway with multiple lanes and vehicles traveling in both directions. There are no buses visible, blue or otherwise, on the highway.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 60 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_60.jpg" alt="Frame 60" class="frame-image">
+                        <p class="card-text">The image depicts an aerial view of a highway with multiple lanes and cars traveling in both directions. There are no buses visible on the road, let alone one that is blue.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 59 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_59.jpg" alt="Frame 59" class="frame-image">
+                        <p class="card-text">The image shows an aerial view of a highway with multiple lanes and several vehicles traveling in both directions. There are no buses visible, blue or otherwise, on the highway.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 58 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_58.jpg" alt="Frame 58" class="frame-image">
+                        <p class="card-text">Error occurred</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 0/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 57 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_57.jpg" alt="Frame 57" class="frame-image">
+                        <p class="card-text">The image shows an aerial view of a highway with multiple lanes and several vehicles driving on it. There are no buses visible in the image, let alone one that is blue.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 56 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_56.jpg" alt="Frame 56" class="frame-image">
+                        <p class="card-text">No description available</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 55 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_55.jpg" alt="Frame 55" class="frame-image">
+                        <p class="card-text">The image shows an aerial view of a highway with multiple lanes and several vehicles driving on it. There are no buses visible in the image, blue or otherwise.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 54 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_54.jpg" alt="Frame 54" class="frame-image">
+                        <p class="card-text">The image shows an aerial view of a highway with multiple lanes and several vehicles traveling on it. There are no buses visible in the image, let alone one that is blue.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 53 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_53.jpg" alt="Frame 53" class="frame-image">
+                        <p class="card-text">The image shows an aerial view of a highway with multiple lanes and a median strip. There are several vehicles on the road, including cars and trucks, but none of them appear to be blue buses. The highway is surrounded by trees and grassy areas, and there are no signs or markings that would indicate the presence of a blue bus.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 52 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_52.jpg" alt="Frame 52" class="frame-image">
+                        <p class="card-text">No description available</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 51 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_51.jpg" alt="Frame 51" class="frame-image">
+                        <p class="card-text">Error occurred</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 0/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 50 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_50.jpg" alt="Frame 50" class="frame-image">
+                        <p class="card-text">The image shows an aerial view of a highway with multiple lanes and a median separating the northbound and southbound traffic. There are several vehicles visible on the road, including cars and trucks, but none of them appear to be blue buses.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 49 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_49.jpg" alt="Frame 49" class="frame-image">
+                        <p class="card-text">The image shows an aerial view of a highway with multiple lanes and several vehicles driving on it. There are no blue buses visible in the image.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 48 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_48.jpg" alt="Frame 48" class="frame-image">
+                        <p class="card-text">The image depicts a highway with multiple lanes and a median strip. There are several vehicles visible on the road, including cars and trucks, but none of them appear to be blue buses. The surrounding landscape features trees and bushes along the side of the road.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 47 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_47.jpg" alt="Frame 47" class="frame-image">
+                        <p class="card-text">The image shows an aerial view of a highway with multiple lanes and a median strip. There are several vehicles on the road, but none of them appear to be blue buses. The highway is surrounded by trees and other vegetation, and there are no signs or markings that suggest the presence of a blue bus.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 46 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_46.jpg" alt="Frame 46" class="frame-image">
+                        <p class="card-text">The image shows an aerial view of a highway with multiple lanes and no vehicles in sight. There are trees and bushes on either side of the road, but no buses or blue-colored vehicles can be seen.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 45 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_45.jpg" alt="Frame 45" class="frame-image">
+                        <p class="card-text">The image shows an aerial view of a highway with multiple lanes and cars driving on it. There are no buses visible in the image, blue or otherwise.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 44 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_44.jpg" alt="Frame 44" class="frame-image">
+                        <p class="card-text">The image shows an aerial view of a highway with multiple lanes and no visible vehicles, including buses. The road is divided into three sections, each with two lanes in opposite directions, separated by concrete barriers or medians filled with trees and bushes. There are no buses present on the highway.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 43 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_43.jpg" alt="Frame 43" class="frame-image">
+                        <p class="card-text">Error occurred</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 0/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 42 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_42.jpg" alt="Frame 42" class="frame-image">
+                        <p class="card-text">The image shows an aerial view of a highway with multiple lanes and various vehicles traveling on it. There are no buses visible in the image, but there are several cars and trucks driving on the road.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 41 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_41.jpg" alt="Frame 41" class="frame-image">
+                        <p class="card-text">The image shows an aerial view of a highway with multiple lanes and several vehicles traveling on it. There are no buses visible in the image, let alone one that is blue.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 40 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_40.jpg" alt="Frame 40" class="frame-image">
+                        <p class="card-text">The image depicts an aerial view of a highway with multiple lanes and on-ramps, featuring several vehicles traveling in both directions. There are no buses visible in the image.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 39 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_39.jpg" alt="Frame 39" class="frame-image">
+                        <p class="card-text">No description available</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 38 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_38.jpg" alt="Frame 38" class="frame-image">
+                        <p class="card-text">The image shows an aerial view of a highway with multiple lanes and several vehicles driving on it. There are no buses visible in the image, let alone a blue one.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 37 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_37.jpg" alt="Frame 37" class="frame-image">
+                        <p class="card-text">No description available</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 36 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_36.jpg" alt="Frame 36" class="frame-image">
+                        <p class="card-text">The image shows an aerial view of a highway with multiple lanes and a median, but there are no buses visible in the image. There are several vehicles on the road, including cars and trucks, but none of them appear to be blue or have any distinctive features that would indicate they are buses.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 35 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_35.jpg" alt="Frame 35" class="frame-image">
+                        <p class="card-text">Error occurred</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 0/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 34 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_34.jpg" alt="Frame 34" class="frame-image">
+                        <p class="card-text">The image depicts an aerial view of a highway with multiple lanes and on-ramps. There are no buses visible in the image, let alone one that is blue.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 33 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_33.jpg" alt="Frame 33" class="frame-image">
+                        <p class="card-text">No description available</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 32 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_32.jpg" alt="Frame 32" class="frame-image">
+                        <p class="card-text">The image depicts an aerial view of a highway with multiple lanes and several vehicles traveling on it. There is no blue bus visible in the image.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 31 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_31.jpg" alt="Frame 31" class="frame-image">
+                        <p class="card-text">The image shows an aerial view of a highway with multiple lanes and cars driving on it. There are no buses visible in the image.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 30 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_30.jpg" alt="Frame 30" class="frame-image">
+                        <p class="card-text">The blue bus is located on the leftmost lane of the highway, heading towards the bottom-right corner of the image. It has a distinctive light blue color with white trim and appears to be a standard-sized city bus. There are no visible signs or advertisements on its side.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 8/10</small>
+                            <small class="text-muted float-end">Match: Yes</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 29 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_29.jpg" alt="Frame 29" class="frame-image">
+                        <p class="card-text">No description available</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 28 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_28.jpg" alt="Frame 28" class="frame-image">
+                        <p class="card-text">No description available</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 27 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_27.jpg" alt="Frame 27" class="frame-image">
+                        <p class="card-text">Error occurred</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 0/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 26 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_26.jpg" alt="Frame 26" class="frame-image">
+                        <p class="card-text">The blue bus is driving on the highway in the image. It has a light blue color and appears to be a single-decker bus with a flat front end. The bus is positioned in the middle lane of the highway, heading towards the right side of the image. There are several cars surrounding it, but they do not appear to be closely following or passing each other.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 8/10</small>
+                            <small class="text-muted float-end">Match: Yes</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 25 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_25.jpg" alt="Frame 25" class="frame-image">
+                        <p class="card-text">The blue bus is driving on the highway, positioned between two lanes of traffic. It has a distinctive light blue color with white lettering and numbers on its side, and appears to be traveling in the same direction as the other vehicles on the road.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 8/10</small>
+                            <small class="text-muted float-end">Match: Yes</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 24 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_24.jpg" alt="Frame 24" class="frame-image">
+                        <p class="card-text">The blue bus is driving on the highway, situated on the right-hand side of the image. It features a distinctive light blue color and has the word "KIBU" written in white letters on its front side. The bus appears to be traveling towards the bottom-right corner of the image.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: Yes</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 23 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_23.jpg" alt="Frame 23" class="frame-image">
+                        <p class="card-text">No description available</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 22 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_22.jpg" alt="Frame 22" class="frame-image">
+                        <p class="card-text">The blue bus is located on the right-hand side of the image, driving towards the bottom-right corner. It has a distinctive light blue color with white trim and appears to be a double-decker bus. The bus is positioned in the rightmost lane of the highway, which is separated from the rest of the traffic by a median strip.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 8/10</small>
+                            <small class="text-muted float-end">Match: Yes</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 21 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_21.jpg" alt="Frame 21" class="frame-image">
+                        <p class="card-text">The blue bus is located on the right side of the highway, driving towards the top-right corner of the image. It has a light blue color with white trim and appears to be a large passenger vehicle. There are no other buses visible in the image.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: Yes</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 20 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_20.jpg" alt="Frame 20" class="frame-image">
+                        <p class="card-text">The image depicts an aerial view of a highway with multiple lanes and a median strip. There are several vehicles visible on the road, including cars and trucks, but none of them appear to be blue buses.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 19 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_19.jpg" alt="Frame 19" class="frame-image">
+                        <p class="card-text">No description available</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 18 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_18.jpg" alt="Frame 18" class="frame-image">
+                        <p class="card-text">Error occurred</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 0/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 17 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_17.jpg" alt="Frame 17" class="frame-image">
+                        <p class="card-text">The image shows an aerial view of a highway with multiple lanes and cars driving on it. There are no buses visible in the image, blue or otherwise.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 16 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_16.jpg" alt="Frame 16" class="frame-image">
+                        <p class="card-text">The image shows an aerial view of a highway with multiple lanes and a median strip. There are no buses visible in the image, only cars driving on the road.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 15 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_15.jpg" alt="Frame 15" class="frame-image">
+                        <p class="card-text">The image shows an aerial view of a highway with multiple lanes and no vehicles resembling a blue bus. The highway is surrounded by trees and bushes on either side, and there are no visible signs of a blue bus driving on the road.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 14 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_14.jpg" alt="Frame 14" class="frame-image">
+                        <p class="card-text">The image shows an aerial view of a highway with multiple lanes and traffic. There are several vehicles on the road, including cars and trucks, but there is no blue bus visible in the image.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 13 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_13.jpg" alt="Frame 13" class="frame-image">
+                        <p class="card-text">The image shows an aerial view of a highway with multiple lanes and several cars driving on it. There are no buses visible in the image, let alone one that is blue.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 12 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_12.jpg" alt="Frame 12" class="frame-image">
+                        <p class="card-text">No description available</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 11 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_11.jpg" alt="Frame 11" class="frame-image">
+                        <p class="card-text">The image shows an aerial view of a highway with multiple lanes and various vehicles traveling on it. There are no buses visible in the image, blue or otherwise.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 10 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_10.jpg" alt="Frame 10" class="frame-image">
+                        <p class="card-text">No description available</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 9 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_9.jpg" alt="Frame 9" class="frame-image">
+                        <p class="card-text">Error occurred</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 0/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 8 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_8.jpg" alt="Frame 8" class="frame-image">
+                        <p class="card-text">The image shows an aerial view of a highway with multiple lanes and a median, but there is no blue bus visible. Instead, the image features various vehicles such as cars, trucks, and vans driving on the highway, with some parked along the sides or in parking lots nearby.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 7 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_7.jpg" alt="Frame 7" class="frame-image">
+                        <p class="card-text">The image shows an aerial view of a highway with multiple lanes and cars driving on it. There are no buses visible in the image, let alone a blue one.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 6 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_6.jpg" alt="Frame 6" class="frame-image">
+                        <p class="card-text">The image shows a highway with multiple lanes and various vehicles traveling on it. There are no buses visible in the image, blue or otherwise.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 5 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_5.jpg" alt="Frame 5" class="frame-image">
+                        <p class="card-text">The image shows an aerial view of a highway with multiple lanes and several vehicles traveling on it. There are no buses visible in the image, let alone a blue one.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 4 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_4.jpg" alt="Frame 4" class="frame-image">
+                        <p class="card-text">The image depicts a highway with multiple lanes and several vehicles traveling in both directions. There are no buses visible, let alone one that is blue.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 3 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_3.jpg" alt="Frame 3" class="frame-image">
+                        <p class="card-text">The image depicts an aerial view of a highway with multiple lanes and various vehicles traveling in both directions. There are no buses visible, blue or otherwise, on the highway.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 2 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_2.jpg" alt="Frame 2" class="frame-image">
+                        <p class="card-text">The image shows an aerial view of a highway with multiple lanes and cars driving on it. There are no buses visible in the image, let alone a blue one.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 1 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_1.jpg" alt="Frame 1" class="frame-image">
+                        <p class="card-text">The image shows an aerial view of a highway with multiple lanes and several vehicles traveling in both directions. There are no buses visible in the image, blue or otherwise.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div><div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at 0 seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="./VideoAnalysis_files/frame_0.jpg" alt="Frame 0" class="frame-image">
+                        <p class="card-text">The image depicts an aerial view of a highway with multiple lanes and a median, featuring several cars traveling in both directions. There are no buses visible in the image.</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: 10/10</small>
+                            <small class="text-muted float-end">Match: No</small>
+                        </p>
+                    </div>
+                </div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="./VideoAnalysis_files/bootstrap.bundle.min.js.download"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const uploadArea = document.getElementById('uploadArea');
+            const videoInput = document.getElementById('videoInput');
+            const uploadForm = document.getElementById('uploadForm');
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            const statusText = document.getElementById('statusText');
+            const errorAlert = document.getElementById('errorAlert');
+            const resultsContainer = document.getElementById('resultsContainer');
+            const fileInfo = document.getElementById('fileInfo');
+
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = '#0d6efd';
+            });
+
+            uploadArea.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = '#ccc';
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = '#ccc';
+                const files = e.dataTransfer.files;
+                if (files.length) {
+                    videoInput.files = files;
+                    updateFileInfo(files[0]);
+                }
+            });
+
+            uploadArea.addEventListener('click', () => {
+                videoInput.click();
+            });
+
+            videoInput.addEventListener('change', (e) => {
+                if (e.target.files.length) {
+                    updateFileInfo(e.target.files[0]);
+                }
+            });
+
+            function updateFileInfo(file) {
+                fileInfo.textContent = `Selected file: ${file.name}`;
+            }
+
+            function showError(message) {
+                errorAlert.textContent = message;
+                errorAlert.classList.remove('d-none');
+            }
+
+            function displayFrame(frame) {
+                const frameCard = document.createElement('div');
+                frameCard.className = 'card mb-3';
+                frameCard.innerHTML = `
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Frame at ${frame.second} seconds</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="${frame.frame_path}" alt="Frame ${frame.second}" class="frame-image">
+                        <p class="card-text">${frame.description || 'No description available'}</p>
+                        <p class="card-text">
+                            <small class="text-muted">Confidence: ${frame.confidence}/10</small>
+                            <small class="text-muted float-end">Match: ${frame.is_match ? 'Yes' : 'No'}</small>
+                        </p>
+                    </div>
+                `;
+                resultsContainer.insertBefore(frameCard, resultsContainer.firstChild);
+            }
+
+            uploadForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const video = videoInput.files[0];
+                const objectStr = document.getElementById('objectInput').value;
+
+                if (!video || !objectStr) {
+                    showError('Please provide both video file and object description');
+                    return;
+                }
+
+                try {
+                    errorAlert.classList.add('d-none');
+                    statusText.classList.remove('d-none');
+                    analyzeBtn.disabled = true;
+                    resultsContainer.innerHTML = '';
+
+                    const formData = new FormData();
+                    formData.append('video', video);
+                    formData.append('object_str', objectStr);
+
+                    const response = await fetch('/analyze', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder();
+
+                    while (true) {
+                        const {value, done} = await reader.read();
+                        if (done) break;
+
+                        const text = decoder.decode(value);
+                        const results = text.split('\n').filter(line => line.trim());
+
+                        for (const result of results) {
+                            try {
+                                const data = JSON.parse(result);
+                                if (data.status === 'success' && data.frame) {
+                                    displayFrame(data.frame);
+                                }
+                            } catch (e) {
+                                console.error('Error parsing result:', e);
+                            }
+                        }
+                    }
+                } catch (error) {
+                    showError('An error occurred during analysis');
+                    console.error('Error:', error);
+                } finally {
+                    statusText.classList.add('d-none');
+                    analyzeBtn.disabled = false;
+                }
+            });
+        });
+    </script>
+
+</body></html>
